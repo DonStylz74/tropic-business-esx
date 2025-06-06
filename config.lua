@@ -1,42 +1,38 @@
 Config = {}
 
-Config.Target = "ox" -- Set to either "qb" or "ox"
-
+Config.Target = "ox" -- Set to either "ox" or "qb" (for ESX, use "ox")
 Config.RequireBusinessLicense = true -- Set to true if a business license is required
-
-Config.Inventory = "ox" -- Set to "qb" or "ox" based on your preference, only needed if RequireBusinessLicense = true
-
-Config.Notify = "qb" -- currently supports: qb, okok
-
+Config.Inventory = "ox" -- Set to "ox" or "qb" (for ESX, use "ox")
+Config.Notify = "esx" -- supports: esx, okok
 Config.PayOption = "cash" -- cash or bank
 
 Config.Businesses = {
     {
         EnableBlip = true,
-        BusinessName = "Burgershot", 
+        BusinessName = "Karting Centre", 
         BusinessPrice = 75000,
-        BusinessJob = "burgershot",
-        BusinessGrade = 4,
-        PedCoords = vector4(-1187.4, -877.69, 12.83, 34.2), -- Set your ped coordinates here
-        PedModel = "u_m_y_burgerdrug_01", -- Set your ped model here, https://docs.fivem.net/docs/game-references/ped-models/
-        BlipCoords = vector3(-1189.14, -890.5, 13.89), -- Set your blip coordinates here
-        BlipSprite = 106, -- Set your blip sprite here, https://docs.fivem.net/docs/game-references/blips/
-        BlipColor = 1, -- Set your blip color here
-        BlipName = "Burgershot", -- Set your blip name here
+        BusinessJob = "karting",
+        BusinessGrade = 2,
+        PedCoords = vector4(-169.3625, -2143.7227, 16.0519, 194.4531),
+        PedModel = "MP_M_WareMech_01",
+        BlipCoords = vector3(-169.3625, -2143.7227, 17.0519),
+        BlipSprite = 748,
+        BlipColor = 1,
+        BlipName = "Karting Centre",
         SellBackPercentage = 75
     },
     {
         EnableBlip = false,
-        BusinessName = "My Business 2",
+        BusinessName = "LS Towing Services",
         BusinessPrice = 75000,
-        BusinessJob = "businessowner2",
-        BusinessGrade = 4,
-        PedCoords = vector4(0.0, 0.0, 0.0, 0.0), -- Set your ped coordinates here
-        PedModel = "a_f_y_business_02", -- Set your ped model here
-        BlipCoords = vector3(0.0, 0.0, 0.0), -- Set your blip coordinates here
-        BlipSprite = 475, -- Set your blip sprite here
-        BlipColor = 2, -- Set your blip color here
-        BlipName = "Business 2", -- Set your blip name here
+        BusinessJob = "towing",
+        BusinessGrade = 3,
+        PedCoords = vector4(0.0, 0.0, 0.0, 0.0),
+        PedModel = "a_f_y_business_02",
+        BlipCoords = vector3(0.0, 0.0, 0.0),
+        BlipSprite = 475,
+        BlipColor = 2,
+        BlipName = "Business 2",
         SellBackPercentage = 40
     }
     -- Add more businesses as needed

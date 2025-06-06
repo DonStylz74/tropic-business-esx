@@ -1,12 +1,12 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+ESX = exports["es_extended"]:getSharedObject()
+local businesses = {}
 
 local function isBusinessOwned(index)
-    local Player = QBCore.Functions.GetPlayerData()
-    return businesses[index] and businesses[index].owner == Player.citizenid
+    local Player = ESX.GetPlayerData()
+    return businesses[index] and businesses[index].owner == Player.identifier
 end
 
 CreateThread(function()
-    print("Config.Target: " .. tostring(Config.Target))
     for i, business in ipairs(Config.Businesses) do
         local pedModel = business.PedModel
         RequestModel(pedModel)
@@ -21,10 +21,9 @@ CreateThread(function()
         SetEntityInvincible(ped, true)
 
         local buyLabel = "Buy Business ($" .. business.BusinessPrice .. ")"
-        local sellLabel = "Sell Business ($" .. (business.BusinessPrice * (business.SellBackPercentage / 100)) .. ")" -- if you want to show how much you get from selling then change line 38 and 61 to: label = sellLabel
+        local sellLabel = "Sell Business ($" .. (business.BusinessPrice * (business.SellBackPercentage / 100)) .. ")"
 
         if Config.Target == "ox" then
-            print("Registering ox_target for business: " .. business.BusinessName)
             exports.ox_target:addLocalEntity(ped, {
                 {
                     name = 'business:buy',
@@ -40,7 +39,7 @@ CreateThread(function()
                 {
                     event = "business:sell",
                     icon = "fas fa-dollar-sign",
-                    label = "Sell Business",
+                    label = sellLabel,
                     args = { index = i },
                     distance = 2.5,
                     onSelect = function()
@@ -48,29 +47,6 @@ CreateThread(function()
                     end
                 }
             })      
-        elseif Config.Target == "qb" then
-            print("Registering qb-target for business: " .. business.BusinessName)
-            exports['qb-target']:AddTargetEntity(ped, {
-                options = {
-                    {
-                        event = "business:buy",
-                        icon = "fas fa-shopping-cart",
-                        label = buyLabel,
-                        action = function()
-                            TriggerServerEvent('business:buyBusiness', i)
-                        end
-                    },
-                    {
-                        event = "business:sell",
-                        icon = "fas fa-dollar-sign",
-                        label = sellLabel,
-                        action = function()
-                            TriggerServerEvent('business:sellBusiness', i)
-                        end
-                    }
-                },
-                distance = 2.5
-            })
         else
             print("Invalid target system specified in config.")
         end
@@ -79,7 +55,7 @@ CreateThread(function()
             local blip = AddBlipForCoord(business.BlipCoords.x, business.BlipCoords.y, business.BlipCoords.z)
             SetBlipSprite(blip, business.BlipSprite)
             SetBlipDisplay(blip, 4)
-            SetBlipScale(blip, 0.75)
+            SetBlipScale(blip, 0.5)
             SetBlipColour(blip, business.BlipColor)
             SetBlipAsShortRange(blip, true)
             BeginTextCommandSetBlipName("STRING")
@@ -87,4 +63,12 @@ CreateThread(function()
             EndTextCommandSetBlipName(blip)
         end
     end
+end)
+
+RegisterNetEvent('business:setBusinesses', function(data)
+    businesses = data
+end)
+
+RegisterNetEvent('esx:playerLoaded', function()
+    TriggerServerEvent('business:requestBusinesses')
 end)

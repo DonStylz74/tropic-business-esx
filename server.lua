@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+ESX = exports["es_extended"]:getSharedObject()
 local businesses = {}
 
 local function loadBusinesses()
@@ -31,129 +31,118 @@ AddEventHandler('onResourceStart', function(resource)
     end
 end)
 
+RegisterNetEvent('business:requestBusinesses', function()
+    local src = source
+    TriggerClientEvent('business:setBusinesses', src, businesses)
+end)
+
 RegisterNetEvent('business:buyBusiness', function(index)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local xPlayer = ESX.GetPlayerFromId(src)
     local business = Config.Businesses[index]
-    local money = Player.PlayerData.money['cash']
+    local money = xPlayer.getMoney()
 
     if Config.RequireBusinessLicense then
         local hasLicense = false
 
-        if Config.Inventory == "qb" then
-            hasLicense = exports['qb-inventory']:HasItem(source, 'business_license', 1)
-        elseif Config.Inventory == "ox" then
-            hasLicense = Player.Functions.GetItemByName('business_license') and Player.Functions.GetItemByName('business_license').amount > 0
+        if Config.Inventory == "ox" then
+            local item = exports.ox_inventory:GetItem(src, 'business_license')
+            hasLicense = item and item.count > 0
         end
 
         if not hasLicense then
-            if Config.Notify == "qb" then
-                TriggerClientEvent('QBCore:Notify', src, "You need a business license to purchase this", 'error')
+            if Config.Notify == "esx" then
+                TriggerClientEvent('esx:showNotification', src, "You need a business license to purchase this")
             elseif Config.Notify == "okok" then
                 TriggerClientEvent('okokNotify:Alert', src, 'Error', 'You need a business license to purchase this', 1000, 'error', false)
-            else
-                print("There is no valid notify script enabled")
             end
             return
         end
     end
 
-    if businesses[index] and businesses[index].owner == Player.PlayerData.citizenid then
-        if Config.Notify == "qb" then
-            TriggerClientEvent('QBCore:Notify', src, "You already own this business", 'error')
+    if businesses[index] and businesses[index].owner == xPlayer.identifier then
+        if Config.Notify == "esx" then
+            TriggerClientEvent('esx:showNotification', src, "You already own this business")
         elseif Config.Notify == "okok" then
             TriggerClientEvent('okokNotify:Alert', src, 'Error', 'You already own this business', 1000, 'error', false)
-        else
-            print("There is no valid notify script enabled")
         end
         return
     end
 
-     if money >= business.BusinessPrice then
-    if Config.PayOption == "cash" then
-        Player.Functions.RemoveMoney('cash', business.BusinessPrice)
-        Player.Functions.SetJob(business.BusinessJob, business.BusinessGrade)
-    elseif Config.PayOption == "bank" then
-        Player.Functions.RemoveMoney('bank', business.BusinessPrice)
-        Player.Functions.SetJob(business.BusinessJob, business.BusinessGrade)
-    else
-        print("Incorrect payment option selected")
-        return 
-    end
+    if money >= business.BusinessPrice then
+        if Config.PayOption == "cash" then
+            xPlayer.removeMoney(business.BusinessPrice)
+            xPlayer.setJob(business.BusinessJob, business.BusinessGrade)
+        elseif Config.PayOption == "bank" then
+            xPlayer.removeAccountMoney('bank', business.BusinessPrice)
+            xPlayer.setJob(business.BusinessJob, business.BusinessGrade)
+        else
+            print("Incorrect payment option selected")
+            return 
+        end
 
-    businesses[index] = {
-        owner = Player.PlayerData.citizenid,
-        job = business.BusinessJob
-    }
+        businesses[index] = {
+            owner = xPlayer.identifier,
+            job = business.BusinessJob
+        }
 
         saveBusinesses() 
+        TriggerClientEvent('business:setBusinesses', -1, businesses)
 
-        if Config.Notify == "qb" then
-            TriggerClientEvent('QBCore:Notify', src, "You have purchased the business and are now the owner of " .. business.BusinessJob, 'success')
+        if Config.Notify == "esx" then
+            TriggerClientEvent('esx:showNotification', src, "You have purchased the business and are now the owner of " .. business.BusinessJob)
         elseif Config.Notify == "okok" then
             TriggerClientEvent('okokNotify:Alert', src, 'Success', "You have purchased the business and are now the owner of " .. business.BusinessJob, 1000, 'success', false)
-        else
-            print("There is no valid notify script enabled")
         end
     else
-        if Config.Notify == "qb" then
-            TriggerClientEvent('QBCore:Notify', src, "You don't have enough money", 'error')
+        if Config.Notify == "esx" then
+            TriggerClientEvent('esx:showNotification', src, "You don't have enough money")
         elseif Config.Notify == "okok" then
             TriggerClientEvent('okokNotify:Alert', src, 'Error', "You don't have enough money", 1000, 'error', false)
-        else
-            print("There is no valid notify script enabled")
         end
     end
 end)
 
 RegisterNetEvent('business:sellBusiness', function(index)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local xPlayer = ESX.GetPlayerFromId(src)
     local business = Config.Businesses[index]
-    local job = Player.PlayerData.job.name
 
-    -- Check if the player owns the business
-    if businesses[index] and businesses[index].owner == Player.PlayerData.citizenid then
-    local refund = business.BusinessPrice * (business.SellBackPercentage / 100)
-    if Config.PayOption == "cash" then
-        Player.Functions.AddMoney('cash', refund)
-        Player.Functions.SetJob('unemployed', 0)
-    elseif Config.PayOption == "bank" then
-        Player.Functions.AddMoney('bank', refund)
-        Player.Functions.SetJob('unemployed', 0)
-    else
-        print("Incorrect payment option selected")
-        return 
-    end
-        
+    if businesses[index] and businesses[index].owner == xPlayer.identifier then
+        local refund = business.BusinessPrice * (business.SellBackPercentage / 100)
+        if Config.PayOption == "cash" then
+            xPlayer.addMoney(refund)
+            xPlayer.setJob('unemployed', 0)
+        elseif Config.PayOption == "bank" then
+            xPlayer.addAccountMoney('bank', refund)
+            xPlayer.setJob('unemployed', 0)
+        else
+            print("Incorrect payment option selected")
+            return 
+        end
 
-        businesses[index] = { owner = nil, job = nil } 
+        businesses[index] = { owner = nil, job = nil }
         saveBusinesses()
-        if Config.Notify == "qb" then
-            TriggerClientEvent('QBCore:Notify', src, "You have sold the business and received $" .. refund, 'success')
+        TriggerClientEvent('business:setBusinesses', -1, businesses)
+
+        if Config.Notify == "esx" then
+            TriggerClientEvent('esx:showNotification', src, "You have sold the business and received $" .. refund)
         elseif Config.Notify == "okok" then
             TriggerClientEvent('okokNotify:Alert', src, 'Success', "You have sold the business and received $" .. refund, 1000, 'success', false)
-        else
-            print("There is no valid notify script enabled")
         end
     else
-        if Config.Notify == "qb" then
-            TriggerClientEvent('QBCore:Notify', src, "You don't own this business", 'error')
+        if Config.Notify == "esx" then
+            TriggerClientEvent('esx:showNotification', src, "You don't own this business")
         elseif Config.Notify == "okok" then
             TriggerClientEvent('okokNotify:Alert', src, 'Error', "You don't own this business", 1000, 'error', false)
-        else
-            print("There is no valid notify script enabled")
         end
     end
 end)
 
-RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-        
+AddEventHandler('esx:playerLoaded', function(playerId, xPlayer)
     for index, data in pairs(businesses) do
-        if data.owner == Player.PlayerData.citizenid then
-            Player.Functions.SetJob(data.job, Config.Businesses[index].BusinessGrade)
+        if data.owner == xPlayer.identifier then
+            xPlayer.setJob(data.job, Config.Businesses[index].BusinessGrade)
         end
     end
 end)

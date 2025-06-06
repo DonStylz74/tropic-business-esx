@@ -20,7 +20,7 @@ server_scripts {
 }
 
 dependencies {
-    'qb-core',
+    'es_extended',
     'ox_target', -- comment out if using qb target
     -- 'qb-target'  -- comment out if using ox target
 }
