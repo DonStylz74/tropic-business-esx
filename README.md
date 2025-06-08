@@ -1,5 +1,5 @@
-# tropic-business - Convered to ESX
-
+<h1>Tropic-Business: Convered to ESX</h1>
+<h3>Coverted by DonStylz</h3>
 
 A simple way to buy businesses
 
@@ -24,3 +24,5 @@ Support: https://dsc.gg/tropicgalxy
 # Most Recent Update
 
 added a config option for how you would like to buy businesses
+
+Credits to tropical-productions for the original tropic-business code.
