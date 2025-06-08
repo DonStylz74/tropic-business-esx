@@ -26,4 +26,4 @@ Support: https://dsc.gg/tropicgalxy
 added a config option for how you would like to buy businesses
 
 
-**Credits** to **tropic-business** for the original tropic-business code.
+**Credits** to **Tropical Productions** for the original tropic-business code.
